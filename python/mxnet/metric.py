@@ -121,14 +121,14 @@ class EvalMetric(object):
         """
         if self.output_names is not None:
             pred = [pred[name] for name in self.output_names]
-        else:
-            pred = list(pred.values())
+        else: #output_names is None means pred has one dict, pred.values() convert dict to NDArray
+            pred = list(pred.values()) 
 
         if self.label_names is not None:
             label = [label[name] for name in self.label_names]
         else:
             label = list(label.values())
-
+        # jump to the function update of some kind of Metric (acc/ce) 
         self.update(label, pred)
 
     def update(self, labels, preds):
@@ -293,6 +293,8 @@ class CompositeEvalMetric(EvalMetric):
                 index, len(self.metrics)))
 
     def update_dict(self, labels, preds): # pylint: disable=arguments-differ
+        # output_names and label_names of CompositeEvalMetric are None
+        # run metric.update_dict for every metric in CompositeEvalMetric
         if self.label_names is not None:
             labels = OrderedDict([i for i in labels.items()
                                   if i[0] in self.label_names])
@@ -410,14 +412,18 @@ class Accuracy(EvalMetric):
             Prediction values for samples. Each prediction value can either be the class index,
             or a vector of likelihoods for all classes.
         """
+        # check_label_shapes is a global function
+        # default parameter shape is none, means just check length, not shape
         labels, preds = check_label_shapes(labels, preds, True)
 
         for label, pred_label in zip(labels, preds):
             if pred_label.shape != label.shape:
+                # Return indices of the maximum values along the given axis, for example, output [0.9, 0.1] ,then [0]
                 pred_label = ndarray.argmax(pred_label, axis=self.axis)
             pred_label = pred_label.asnumpy().astype('int32')
             label = label.asnumpy().astype('int32')
             # flatten before checking shapes to avoid shape miss match
+            # ndarray 转换为 一维迭代器，flatiter
             label = label.flat
             pred_label = pred_label.flat
 
