@@ -1135,7 +1135,7 @@ class CrossEntropy(EvalMetric):
         for label, pred in zip(labels, preds):
             label = label.asnumpy()
             pred = pred.asnumpy()
-
+            # ndarray.ravel() Return a flattened array.
             label = label.ravel()
             assert label.shape[0] == pred.shape[0]
 
